@@ -2,23 +2,32 @@ import React, { useContext, useState } from "react";
 import { AppContext } from "../context/AppContext";
 
 const AllocationForm = (props) => {
-  const { dispatch, remaining } = useContext(AppContext);
+  const { dispatch, remaining, currency } = useContext(AppContext);
 
   const [name, setName] = useState("");
   const [cost, setCost] = useState("");
-  const [action, setAction] = useState("");
+  const [action, setAction] = useState("Add");
 
   const submitEvent = () => {
-    if (cost > remaining) {
-      alert("The value cannot exceed remaining funds  £" + remaining);
+    const parsedCost = parseInt(cost);
+
+    if (isNaN(parsedCost)) {
+      alert("Please enter a valid number for the cost.");
+      setCost("");
+      return;
+    }
+
+    if (parsedCost > remaining && action === "Add") {
+      alert("The value cannot exceed remaining funds " + currency + remaining);
       setCost("");
       return;
     }
 
     const expense = {
       name: name,
-      cost: parseInt(cost),
+      cost: parsedCost,
     };
+
     if (action === "Reduce") {
       dispatch({
         type: "RED_EXPENSE",
@@ -48,7 +57,6 @@ const AllocationForm = (props) => {
           >
             <option defaultValue>Choose...</option>
             <option value="Marketing" name="marketing">
-              {" "}
               Marketing
             </option>
             <option value="Sales" name="sales">
@@ -86,6 +94,9 @@ const AllocationForm = (props) => {
             </option>
           </select>
 
+          <div className="input-group-prepend" style={{ marginLeft: "2rem" }}>
+            <label className="input-group-text">{currency}</label>
+          </div>
           <input
             required="required"
             type="number"
